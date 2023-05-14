@@ -53,6 +53,10 @@ contract Lottery {
         lotteryHistory[lotteryId] = players[index];
         lotteryId++;
 
+        address payable winner = players[index];
+        // players 배열 초기화, (0)은 size를 0으로 지정
+        players = new address payable[](0);
+
         // reentrancy attack 위험(재진입 공격)
         // 재진입으로 인해 상태값이 변경되는 것을 방지하기 위해 상태값을 변경하는 구문은
         // 다른 contract와의 interaction 가능성 있는 함수 실행 전 사용을 끝내야 함
@@ -60,13 +64,10 @@ contract Lottery {
         // players[index]에 현재 contract의 ether를 모두 전송
         // call 외에도 send와 transfer이 있지만 둘 다 소비 gas가 2300으로 고정되어 있음
         // 2019년 12월 operation code의 gas 소비량 증가, 가변적인 call 사용 추천
-        (bool success, ) = players[index].call{value: address(this).balance}(
+        (bool success, ) = winner.call{value: address(this).balance}(
             ""
         );
         require(success, "Fail to send ether");
-
-        // players 배열 초기화, (0)은 size를 0으로 지정
-        players = new address payable[](0);
     }
 
     modifier onlyOwner() {
