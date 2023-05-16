@@ -18,6 +18,10 @@ contract CommitRevealLottery {
     revealCloses = commitCloses + DURATION;
   }
 
+  function getBalance() public view returns(uint256) {
+    return address(this).balance;
+  }
+
   function enter(bytes32 commitment) public payable {
     require(msg.value >= 0.01 ether, "msg.value should be greater than or equal to 0.01 ether");
     require(block.number < commitCloses, "commit duration is over");
@@ -29,9 +33,19 @@ contract CommitRevealLottery {
     return keccak256(abi.encodePacked(msg.sender, secret));
   }
 
+  function isAlreadyRevealed() public view returns (bool) {
+      for(uint256 i = 0 ; i < players.length ; i++) {
+          if(msg.sender == players[i]) {
+              return true;
+          }
+      }
+      return false;
+  }
+
   function reveal(uint256 secret) public {
     require(block.number >= commitCloses, "commit duration is not closed yet");
     require(block.number < revealCloses, "reveal duration is already closed");
+    require(!isAlreadyRevealed(), "You already revealed");
 
     bytes32 commit = createCommitment(secret);
     require(commit == commitments[msg.sender], "commit not matches");

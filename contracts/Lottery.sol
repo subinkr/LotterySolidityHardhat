@@ -3,7 +3,7 @@ pragma solidity ^0.8.15;
 
 contract Lottery {
     address public owner;
-    address payable[] public players;
+    address[] public players;
     uint256 public lotteryId;
     mapping(uint256 => address) public lotteryHistory;
 
@@ -18,7 +18,7 @@ contract Lottery {
     }
 
     // storage의 players를 memory에 복사해 return
-    function getPlayers() public view returns (address payable[] memory) {
+    function getPlayers() public view returns (address[] memory) {
         return players;
     }
 
@@ -47,13 +47,13 @@ contract Lottery {
 
 
     function pickWinner() public onlyOwner {
-        uint256 index = getRandomNumber() % players.length;
+        uint256 index = getRandomNumberV2() % players.length;
 
         // address payable -> address 저장 가능, 반대는 불가능
         lotteryHistory[lotteryId] = players[index];
         lotteryId++;
 
-        address payable winner = players[index];
+        address payable winner = payable(players[index]);
         // players 배열 초기화, (0)은 size를 0으로 지정
         players = new address payable[](0);
 
